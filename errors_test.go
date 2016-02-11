@@ -1,6 +1,7 @@
 package badio
 
 import (
+	"fmt"
 	"testing"
 )
 

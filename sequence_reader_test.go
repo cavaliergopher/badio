@@ -53,14 +53,11 @@ func TestSequenceReader(t *testing.T) {
 }
 
 func ExampleNewSequenceReader() {
-	// create a reader to repeat byte sequence "na"
 	r := NewSequenceReader([]byte("na"))
 
-	// read into a buffer of 20 bytes
 	p := make([]byte, 20)
 	r.Read(p)
 
-	// print "ba" followed by the buffer content
 	fmt.Printf("ba%s\n", p)
 
 	// Output: banananananananananana

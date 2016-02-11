@@ -10,29 +10,25 @@ type truncateReader struct {
 	o int64
 }
 
-// EOF is signaled by a zero count with err set to io.EOF.
+// NewTruncateReader returns a Reader that behaves like r except that it will
+// return zero count and an io.EOF error once it has read n bytes.
 func NewTruncateReader(r io.Reader, n int64) io.Reader {
 	return &truncateReader{r: r, n: n}
 }
 
 func (c *truncateReader) Read(p []byte) (n int, err error) {
-	// EOF after cutoff
-	if c.o > c.n {
-		return 0, io.EOF
-	}
-
-	// compute read length
+	// reduce read size if it exceeds the breakpoint
 	n = len(p)
 	if c.o+int64(n) > c.n {
 		n = int(c.n - c.o)
 	}
 
-	// have we reached EOF?
+	// test if EOF exceeded
 	if n == 0 {
 		return 0, io.EOF
 	}
 
-	// real read
+	// read into buffer
 	n, err = c.r.Read(p[0:n])
 	c.o += int64(n)
 

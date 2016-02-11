@@ -1,51 +1,66 @@
 package badio
 
 import (
+	"bytes"
+	"fmt"
 	"io"
+	"strings"
 	"testing"
 )
 
-type truncTest struct {
-	bufferSize  int
-	truncOffset int64
-}
-
 func TestTruncateReader(t *testing.T) {
-	tests := []truncTest{
-		truncTest{0, 0},
-		truncTest{0, 1},
-		truncTest{1, 0},
-		truncTest{1, 2},
-		truncTest{1, 3},
-		truncTest{100, 0},
-		truncTest{100, 1},
-		truncTest{100, 99},
-		truncTest{100, 100},
-		truncTest{100, 101},
-	}
+	s := "abcdefghijklmnopqrstuvwxyz"
+	for i := 0; i < len(s); i++ {
+		// create a full size buffer
+		p := make([]byte, len(s))
 
-	for i, test := range tests {
-		p := make([]byte, test.bufferSize)
-		r := NewTruncateReader(NewNullReader(), test.truncOffset)
+		// create truncate read to truncate at i
+		r := NewTruncateReader(strings.NewReader(s), int64(i))
 
-		var o int = 0
-		var err error = nil
-		for err == nil {
-			var n int
-			n, err = r.Read(p)
+		// read one byte at a time
+		var n, o int
+		var err error
+		for x := 0; x < len(s) && err == nil; x++ {
+			n, err = r.Read(p[x : x+1])
 			o += n
 		}
 
-		// make sure got an EOF
+		// ensure we reach EOF
 		if err != io.EOF {
-			t.Errorf("%v", err)
+			t.Fatalf("Expected io.EOF, got: %v", err)
 		}
 
-		// make sure the correct number of bytes were read
-		if int64(o) != test.truncOffset && test.truncOffset < int64(test.bufferSize) {
-			t.Errorf("Read %d bytes instead of %d in test %d (buffer size: %d)", o, test.truncOffset, i+1, len(p))
+		// make sure break point was accurate
+		if o != i {
+			t.Fatalf("Expected to read %d bytes, got: %d", i, n)
 		}
 
-		// TODO: inspect read bytes and validate the count
+		// validate new string
+		out := string(bytes.Trim(p, "\x00"))
+		if out != s[:i] {
+			t.Errorf("Expected '%s', got: '%s'", s[:i], out)
+		}
+
+		// make sure next read is io.EOF
+		n, err = r.Read(p)
+		if n != 0 {
+			t.Errorf("Expected to read 0 bytes, got %d", n)
+		}
+
+		if err != io.EOF {
+			t.Fatalf("Expected io.EOF, got: %v", err)
+		}
 	}
+}
+
+func ExampleNewTruncateReader() {
+	s := strings.NewReader("banananananananananana")
+	r := NewTruncateReader(s, 6)
+
+	p := make([]byte, 20)
+	r.Read(p)
+
+	fmt.Printf("%s\n", bytes.Trim(p, "\x00"))
+
+	// Output: banana
 }

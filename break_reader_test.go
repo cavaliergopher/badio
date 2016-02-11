@@ -1,7 +1,6 @@
 package badio
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 	"testing"
@@ -46,6 +45,16 @@ func TestBreakReader(t *testing.T) {
 		if n != i {
 			t.Fatalf("Expected %d bytes to be changed, got %d", i, n)
 		}
+
+		// make sure next read is an error
+		n, err = r.Read(p)
+		if n != 0 {
+			t.Errorf("Expected to read 0 bytes, got %d", n)
+		}
+
+		if !IsBadIOError(err) {
+			t.Fatalf("Expected BadIOError, got: %v", err)
+		}
 	}
 }
 
@@ -54,9 +63,9 @@ func ExampleNewBreakReader() {
 	r := NewBreakReader(s, 6)
 
 	p := make([]byte, 20)
-	r.Read(p)
+	_, err := r.Read(p)
 
-	fmt.Printf("%s\n", bytes.Trim(p, "\x00"))
+	fmt.Printf("Error: %v\n", err)
 
-	// Output: banana
+	// Output: Error: Reader break point at offset 6 (0x6)
 }

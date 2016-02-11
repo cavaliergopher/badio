@@ -13,7 +13,7 @@ func NewNullReader() io.Reader {
 }
 
 func (c *nullReader) Read(p []byte) (int, error) {
-	var i int = 0
+	var i int
 	for ; i < len(p); i++ {
 		p[i] = 0
 	}

@@ -1,6 +1,6 @@
 # BadIO
 
-[![GoDoc](https://godoc.org/github.com/cavaliercoder/badio?status.svg)](https://godoc.org/github.com/cavaliercoder/badio)
+[![GoDoc](https://godoc.org/github.com/cavaliercoder/badio?status.svg)](https://godoc.org/github.com/cavaliercoder/badio) [![Build Status](https://travis-ci.org/cavaliercoder/badio.svg?branch=master)](https://travis-ci.org/cavaliercoder/badio) [![Go Report Card](https://goreportcard.com/badge/github.com/cavaliercoder/badio)](https://goreportcard.com/report/github.com/cavaliercoder/badio)
 
 Package badio contains extensions to Go's [testing/iotest](https://golang.org/pkg/testing/iotest/)
 package and implements Readers and Writers useful mainly for testing.

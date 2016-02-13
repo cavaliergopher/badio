@@ -1,14 +1,16 @@
 package badio
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"strings"
 	"testing"
 )
 
 func TestBreakReader(t *testing.T) {
 	// reader to generate infinite stream of 0x01
-	tr := NewSequenceReader([]byte{0x01})
+	tr := NewSequenceReader([]byte{0xFF})
 
 	tests := 1024
 	for i := 0; i < tests; i++ {
@@ -55,6 +57,20 @@ func TestBreakReader(t *testing.T) {
 		if !IsBadIOError(err) {
 			t.Fatalf("Expected BadIOError, got: %v", err)
 		}
+	}
+
+	// what if underlying reader is shorter than the break point?
+	tr = NewBreakReader(bytes.NewReader(make([]byte, 8)), 16)
+
+	var n, o int
+	var err error
+	for err == nil && o < 16 {
+		n, err = tr.Read(make([]byte, 16))
+		o += n
+	}
+
+	if err != io.EOF {
+		t.Fatalf("Expected io.EOF, got: %v", err)
 	}
 }
 

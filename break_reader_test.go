@@ -11,7 +11,6 @@ import (
 func TestBreakReader(t *testing.T) {
 	// reader to generate infinite stream of 0x01
 	tr := NewSequenceReader([]byte{0xFF})
-
 	tests := 1024
 	for i := 0; i < tests; i++ {
 		// create a big buffer
